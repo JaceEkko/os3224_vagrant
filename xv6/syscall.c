@@ -20,6 +20,8 @@ fetchint(uint addr, int *ip)
   if(addr >= proc->sz || addr+4 > proc->sz)
     return -1;
   *ip = *(int*)(addr);
+  //cprintf("addr: %d, ip: %d\n", addr, *ip, (char*)addr);
+  //cprintf("ip: %d\n", *ip);
   return 0;
 }
 
@@ -34,7 +36,10 @@ fetchstr(uint addr, char **pp)
   if(addr >= proc->sz)
     return -1;
   *pp = (char*)addr;
+  //cprintf("%s\n", *pp); //THIS IS PROGRESS (looks like the system call)
+  //cprintf("%d\n", proc->tf->eax);
   ep = (char*)proc->sz;
+  //cprintf("ep: %s", ep); //EP PRINT OUT
   for(s = *pp; s < ep; s++)
     if(*s == 0)
       return s - *pp;
@@ -45,6 +50,8 @@ fetchstr(uint addr, char **pp)
 int
 argint(int n, int *ip)
 {
+  //cprintf("n: %d, ip: %d\n", n, ip); TRIED
+  //cprintf("esp: %d\n", proc->tf->esp);
   return fetchint(proc->tf->esp + 4 + 4*n, ip);
 }
 
@@ -61,6 +68,7 @@ argptr(int n, char **pp, int size)
   if((uint)i >= proc->sz || (uint)i+size > proc->sz)
     return -1;
   *pp = (char*)i;
+  //cprintf("OTHER: %s\n", *pp);
   return 0;
 }
 
@@ -72,6 +80,7 @@ int
 argstr(int n, char **pp)
 {
   int addr;
+  //cprintf("%s\n", *pp); PANICS DON'T KNOW WHY
   if(argint(n, &addr) < 0)
     return -1;
   return fetchstr(addr, pp);
@@ -123,14 +132,24 @@ static int (*syscalls[])(void) = {
 [SYS_close]   sys_close,
 };
 
+//Called on a syscall trap. Checks that the syscall number 
+//established in syscall.h (passed via eax) is valid
+//and then calls the appropriate handler for the syscall.
 void
 syscall(void)
 {
   int num;
-
-  num = proc->tf->eax;
+  num = proc->tf->eax; //set num to equal the system call number 
+  //cprintf("call: %s, num: %d\n", (char*)num, num);//THIS WORKS
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
     proc->tf->eax = syscalls[num]();
+	//cprintf("name: %s, proc->tf->eax: %d\n", proc->name, proc->tf->eax);
+	//proc->tf->eax = syscalls[1](); //maybe fork: 0
+	//cprintf("%s", proc->name); // seeing if this prints out the system call
+	//cprintf("\n");
+	//cprintf("%c\n", syscalls[num]);
+	//cprintf("PID: %d, NAME: %s, NUM: %d\n", proc->pid, proc->name, num);
+	//cprintf("CALL: %s EAX: %d\n", (char*)syscalls[num], proc->tf->eax);//THIS WORKS
   } else {
     cprintf("%d %s: unknown sys call %d\n",
             proc->pid, proc->name, num);
