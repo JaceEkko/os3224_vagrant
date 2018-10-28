@@ -93,5 +93,8 @@ sys_uptime(void)
 int
 sys_date(void)
 {
-  
+  struct rtcdate ∗d;
+  if( argptr(0, (void∗)&d, sizeof(struct rtcdate) )< 0 ){
+    return −1;
+  }
 }
