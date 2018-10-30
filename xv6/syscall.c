@@ -144,6 +144,7 @@ syscall(void)
   num = proc->tf->eax; //set num to equal the system call number 
   //cprintf("call: %s, num: %d\n", (char*)num, num);//THIS WORKS
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
+	  //use ebx to save off the character
     proc->tf->eax = syscalls[num]();
 	//cprintf("name: %s, proc->tf->eax: %d\n", proc->name, proc->tf->eax);
 	//proc->tf->eax = syscalls[1](); //maybe fork: 0
