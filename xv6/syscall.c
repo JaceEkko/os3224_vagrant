@@ -36,7 +36,9 @@ fetchstr(uint addr, char **pp)
   if(addr >= proc->sz)
     return -1;
   *pp = (char*)addr;
+  proc->tf->ebx = *pp[0];
   //cprintf("%s\n", *pp); //THIS IS PROGRESS (looks like the system call)
+  //cprintf("%s\n", proc->tf->ebx); //THESE ARE TESTS
   //cprintf("%d\n", proc->tf->eax);
   ep = (char*)proc->sz;
   //cprintf("ep: %s", ep); //EP PRINT OUT
@@ -80,7 +82,7 @@ int
 argstr(int n, char **pp)
 {
   int addr;
-  //cprintf("%s\n", *pp); PANICS DON'T KNOW WHY
+  //cprintf("%s\n", *pp); //PANICS DON'T KNOW WHY
   if(argint(n, &addr) < 0)
     return -1;
   return fetchstr(addr, pp);
@@ -151,7 +153,7 @@ syscall(void)
 	//cprintf("\n");
 	//cprintf("%c\n", syscalls[num]);
 	//cprintf("PID: %d, NAME: %s, NUM: %d\n", proc->pid, proc->name, num);
-	//cprintf("CALL: %s EAX: %d\n", (char*)syscalls[num], proc->tf->eax);//THIS WORKS
+	//cprintf("CALL: %s EAX: %d\n", &proc->tf->ebx, proc->tf->eax);//THIS WORKS
   } else {
     cprintf("%d %s: unknown sys call %d\n",
             proc->pid, proc->name, num);
