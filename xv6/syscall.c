@@ -143,18 +143,15 @@ void
 syscall(void)
 {
   int num;
-  num = proc->tf->eax; //set num to equal the system call number 
-  //cprintf("call: %s, num: %d\n", (char*)num, num);//THIS WORKS
+  num = proc->tf->eax; //set num to equal the system call number
+  
+  char *sys_arr[22] = { "","fork","exit","wait","pipe","read","kill","exec","fstat", /*Gives us the system call name based on the num we get above*/
+  "chdir","dup","getpid","sbrk","sleep","uptime","open","write","mknod","unlink",
+  "link","mkdir","close" };
+   
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
-	  //use ebx to save off the character
-    proc->tf->eax = syscalls[num]();
-	//cprintf("name: %s, proc->tf->eax: %d\n", proc->name, proc->tf->eax);
-	//proc->tf->eax = syscalls[1](); //maybe fork: 0
-	//cprintf("%s", proc->name); // seeing if this prints out the system call
-	//cprintf("\n");
-	//cprintf("%c\n", syscalls[num]);
-	//cprintf("PID: %d, NAME: %s, NUM: %d\n", proc->pid, proc->name, num);
-	//cprintf("CALL: %s EAX: %d\n", &proc->tf->ebx, proc->tf->eax);//THIS WORKS
+	proc->tf->eax = syscalls[num]();
+	cprintf("%s -> %d\n", sys_arr[num], proc->tf->eax);
   } else {
     cprintf("%d %s: unknown sys call %d\n",
             proc->pid, proc->name, num);
